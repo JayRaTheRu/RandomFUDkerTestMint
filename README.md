@@ -1,0 +1,1 @@
+This is a Magma:Onyx TESTNET FUDker Card Edition RANDOM style mint! 14 TESTNET FUDker collecting cards, 100 per FUDker (1,400 total). Just experimenting on the testnet to fine tune things for Mainnet launches. I'm a FUDker, you're a FUDker, we're all just a bunch of FUDkers chillin in The Neighborhood On The BLockchain!
