@@ -1,4 +1,4 @@
-# FUDkers NFT Contract Deployment and Configuration Guide
+# FUDkers NFT Notes for Deployment and Configuration
 
 ## Deployment with Remix
 1. Open Remix IDE and import the FUDkers contract.
