@@ -17,8 +17,8 @@ We're all FUDkers here, experimenting, learning, and fine-tuning our blockchain 
 
 ## How to Participate
 
-1. **Wallet Setup**: Ensure you have a wallet that supports Ethereum testnet transactions (e.g., MetaMask).
-2. **Get Testnet ETH**: Obtain some testnet Ethereum from a faucet to cover transaction fees.
+1. **Wallet Setup**: Ensure you have a wallet that supports Magma testnet transactions (e.g., MetaMask).
+2. **Get Testnet ETH**: Obtain some testnet LAVA.
 3. **Connect Your Wallet**: Visit our DApp, and connect your wallet to participate in the minting process.
 4. **Mint Your FUDker Card**: Follow the instructions on the DApp to mint your very own TESTNET FUDker Card.
 
@@ -26,7 +26,7 @@ We're all FUDkers here, experimenting, learning, and fine-tuning our blockchain 
 
 - **Phase 1**: Launch of the TESTNET FUDker Card Edition.
 - **Phase 2**: Community feedback and DApp improvements based on user experience.
-- **Phase 3**: Final adjustments and preparations for the Mainnet launch.
+- **Phase 3**: Final adjustments and preparations for the Magma Mainnet launch.
 
 ## Join the Community
 
