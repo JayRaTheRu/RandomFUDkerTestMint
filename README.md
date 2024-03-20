@@ -1,6 +1,6 @@
 # Magma:Onyx TESTNET FUDker Card Edition
 
-Welcome to the **Magma:Onyx TESTNET FUDker Card Edition**, an experimental RANDOM style mint of NFTs on the Ethereum testnet! This project is all about embracing the FUD (Fear, Uncertainty, and Doubt) in a fun and engaging way, as we prepare for our mainnet launches.
+Welcome to the **Magma:Onyx TESTNET FUDker Card Edition**, an experimental RANDOM style mint of NFTs on the Magma Onyx Testnet! This project is all about embracing the FUD (Fear, Uncertainty, and Doubt) in a fun and engaging way, as we prepare for our mainnet launches.
 
 ## Overview
 
