@@ -45,5 +45,5 @@ Please note that this project is currently in a testing phase on the Ethereum te
 
 ---
 
-We're thrilled to have you join us in this experimental journey. Remember, in **The Neighborhood On The BLockchain**, we're all just a bunch of FUDkers chillin'. Let's embrace the FUD and turn it into something amazing!
+We're thrilled to have you join us in this experimental journey. Remember, I'm a FUDker, you're a FUDker, we're all just a bunch of FUDkers chillin in **The Neighborhood On The Blockchain**. Let's embrace the FUD and turn it into something amazing!
 
