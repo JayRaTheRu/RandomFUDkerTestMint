@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FUDkers Owner Interface</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000; /* Black background */
+            color: #F5F5F5; /* Off-white text */
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .app-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        input, button {
+            margin-top: 10px;
+            padding: 12px;
+            font-size: 16px;
+            width: 100%;
+            border: none;
+            border-radius: 5px;
+            box-sizing: border-box;
+            background-color: #333; /* Darker background for inputs and buttons */
+            color: #F5F5F5; /* Off-white text for inputs and buttons */
+        }
+
+        button {
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #555; /* Slightly lighter on hover */
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="app-title">FUDkers Contract Admin Panel</div>
+        <button onclick="connectWallet()">Connect Wallet</button>
+
+        <div id="adminActions" style="display:none;">
+            <input type="text" id="baseURI" placeholder="Set Base URI">
+            <button onclick="setBaseURI()">Set Base URI</button>
+
+            <input type="text" id="mintPrice" placeholder="Set Mint Price (in LAVA)">
+            <button onclick="setMintPrice()">Set Mint Price</button>
+
+            <input type="text" id="saleStartTime" placeholder="Sale Start Time (UNIX timestamp)">
+            <input type="text" id="saleEndTime" placeholder="Sale End Time (UNIX timestamp)">
+            <button onclick="setSaleTime()">Set Sale Time</button>
+
+            <button onclick="withdrawFunds()">Withdraw Funds</button>
+        </div>
+    </div>
+    <script>
+        let contract;
+        let userAccount;
+
+        const contractABI = [
+            // Insert your contract's ABI here
+        ];
+
+        const contractAddress = 'YOUR_CONTRACT_ADDRESS_HERE';
+
+        async function connectWallet() {
+            if (window.ethereum) {
+                try {
+                    const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                    userAccount = accounts[0];
+                    document.getElementById('adminActions').style.display = 'block';
+                    initContract();
+                } catch (error) {
+                    console.error('Error connecting to MetaMask:', error);
+                }
+            } else {
+                alert('Please install MetaMask to use this feature!');
+            }
+        }
+
+        function initContract() {
+            contract = new web3.eth.Contract(contractABI, contractAddress);
+        }
+
+        async function setBaseURI() {
+            const uri = document.getElementById('baseURI').value.trim();
+            if (!uri) {
+                alert("Base URI is required.");
+                return;
+            }
+            await contract.methods.setBaseURI(uri).send({ from: userAccount });
+            alert("Base URI updated successfully.");
+        }
+
+        async function setMintPrice() {
+            const price = document.getElementById('mintPrice').value.trim();
+            if (!price) {
+                alert("Mint Price is required.");
+                return;
+            }
+            const priceInWei = web3.utils.toWei(price, 'ether');
+            await contract.methods.setMintPrice(priceInWei).send({ from: userAccount });
+            alert("Mint Price updated successfully.");
+        }
+
+        async function setSaleTime() {
+            const startTime = document.getElementById('saleStartTime').value.trim();
+            const endTime = document.getElementById('saleEndTime').value.trim();
+            if (!startTime || !endTime) {
+                alert("Both Sale Start Time and End Time are required.");
+                return;
+            }
+            await contract.methods.setSaleTime(startTime, endTime).send({ from: userAccount });
+            alert("Sale time updated successfully.");
+        }
+
+        async function withdrawFunds() {
+            await contract.methods.withdraw().send({ from: userAccount });
+            alert("Funds withdrawn successfully.");
+        }
+
+        window.addEventListener('load', async () => {
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+            } else {
+                console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+            }
+        });
+    </script>
+</body>
+</html>
+
