@@ -1,101 +1,188 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts@4.0.0/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts@4.0.0/access/Ownable.sol";
+import "@openzeppelin/contracts@4.0.0/security/Pausable.sol";
+import "@openzeppelin/contracts@4.0.0/utils/Strings.sol";
+import "@openzeppelin/contracts/utils/Base64.sol";
 
-contract FUDkers is ERC721Enumerable, Ownable {
+contract FUDkersTN is ERC721Enumerable, Ownable, Pausable {
+    using Strings for uint256;
+
+    uint256 public mintPrice = 0.05 ether;
     string private baseURI;
-    uint256 public constant MAX_SUPPLY = 1700; // Total supply across all card types
-    uint256[17] public cardSupplies; // Track supply for each card type
-    uint256 public mintPrice; // Adjustable mint price
-    uint256 public saleStartTime; // Sale start time
-    uint256 public saleEndTime; // Sale end time
+    string[] private _cardNames = [
+        "Viny-L",
+        "Bloo",
+        "Lou-Cypher",
+        "kiETH",
+        "Krypta",
+        "Pe-Pe",
+        "Pau-Lee",
+        "Ayuh",
+        "YuDoo-YuGee",
+        "FunKer",
+        "JBee",
+        "JoeJo",
+        "TyRa",
+        "eM-eF"
+    ];
+    mapping(uint256 => uint256) public cardScores;
+    mapping(uint256 => uint256) private _cardTypes;
 
-    // Events for contract configuration changes
-    event BaseURIChanged(string newBaseURI);
-    event MintPriceChanged(uint256 newMintPrice);
-    event SaleTimeChanged(uint256 newSaleStartTime, uint256 newSaleEndTime);
-
-    constructor() ERC721("FUDkers", "FUDK") {}
-
-    // Modifier to check if the sale is active
-    modifier saleIsActive() {
-        require(block.timestamp >= saleStartTime && block.timestamp <= saleEndTime, "Sale is not active");
-        _;
+    constructor(string memory initialBaseURI)
+        ERC721("FUDkersTN", "FUDkersMagmaTN")
+    {
+        setBaseURI(initialBaseURI);
+        transferOwnership(msg.sender); // Explicitly set the contract owner
     }
 
-    // Public mint function with payable to enforce mint price
-    function mint() public payable saleIsActive {
-        require(msg.value >= mintPrice, "Insufficient payment for minting");
-        require(totalSupply() < MAX_SUPPLY, "All cards are minted");
-        uint256 cardType = _randomCardType();
-        uint256 tokenId = totalSupply() + 1;
-        _safeMint(msg.sender, tokenId);
-        cardSupplies[cardType]++;
+    function mint(uint256 quantity) public payable whenNotPaused {
+        require(
+            quantity == 1 || quantity == 5,
+            "Can only mint 1 or 5 at a time"
+        );
+        require(msg.value >= mintPrice * quantity, "Ether sent is not correct");
+
+        for (uint256 i = 0; i < quantity; i++) {
+            uint256 tokenId = totalSupply() + 1;
+            uint256 cardType = _randomCardType();
+            _safeMint(msg.sender, tokenId);
+            _cardTypes[tokenId] = cardType;
+            cardScores[tokenId] = _randomScore();
+        }
     }
 
-    // Admin function to set the base URI for metadata
-    function setBaseURI(string memory _newBaseURI) public onlyOwner {
-        baseURI = _newBaseURI;
-        emit BaseURIChanged(baseURI);
+    function _randomCardType() private view returns (uint256) {
+        uint256 random = uint256(
+            keccak256(
+                abi.encodePacked(block.timestamp, msg.sender, totalSupply())
+            )
+        ) % 1000;
+        // Let Solidity infer the array type
+        uint256[] memory thresholds = new uint256[](14);
+        thresholds[0] = 100;
+        thresholds[1] = 200;
+        thresholds[2] = 300;
+        thresholds[3] = 400;
+        thresholds[4] = 500;
+        thresholds[5] = 600;
+        thresholds[6] = 700;
+        thresholds[7] = 800;
+        thresholds[8] = 875;
+        thresholds[9] = 925;
+        thresholds[10] = 950;
+        thresholds[11] = 975;
+        thresholds[12] = 990;
+        thresholds[13] = 1000;
+
+        for (uint256 i = 0; i < thresholds.length; i++) {
+            if (random < thresholds[i]) {
+                return i;
+            }
+        }
+        return thresholds.length - 1; // Safeguard, should not be reached
     }
 
-    // Admin function to set the mint price
-    function setMintPrice(uint256 _newMintPrice) public onlyOwner {
-        mintPrice = _newMintPrice;
-        emit MintPriceChanged(mintPrice);
+    function _randomScore() private view returns (uint256) {
+        return
+            (uint256(
+                keccak256(
+                    abi.encodePacked(block.timestamp, msg.sender, totalSupply())
+                )
+            ) % 100) + 1;
     }
 
-    // Admin function to set the sale start and end times
-    function setSaleTime(uint256 _saleStartTime, uint256 _saleEndTime) public onlyOwner {
-        require(_saleEndTime > _saleStartTime, "End time must be after start time");
-        saleStartTime = _saleStartTime;
-        saleEndTime = _saleEndTime;
-        emit SaleTimeChanged(saleStartTime, saleEndTime);
+    function setMintPrice(uint256 _mintPrice) external onlyOwner {
+        mintPrice = _mintPrice;
     }
 
-    // Admin function to withdraw contract balance to the owner's wallet
-    function withdraw() public onlyOwner {
-        uint256 balance = address(this).balance;
-        require(balance > 0, "No funds available");
-        payable(owner()).transfer(balance);
+    function setBaseURI(string memory newBaseURI) public onlyOwner {
+        baseURI = newBaseURI;
     }
 
-    // Override to return the set baseURI
-    protected override function _baseURI() internal view returns (string memory) {
+    function withdraw() external onlyOwner {
+        payable(owner()).transfer(address(this).balance);
+    }
+
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() public onlyOwner {
+        _unpause();
+    }
+
+    function _baseURI() internal view override returns (string memory) {
         return baseURI;
     }
 
-    // Token URI construction based on card type
-    function tokenURI(uint256 tokenId) public view override returns (string memory) {
-        require(_exists(tokenId), "Query for nonexistent token");
-        string memory base = _baseURI();
-        uint256 cardType = (tokenId - 1) % 17 + 1; // Simplified card type logic
-        return bytes(base).length > 0 ? string(abi.encodePacked(base, _toString(cardType), ".jpg")) : "";
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        require(
+            _exists(tokenId),
+            "ERC721Metadata: URI query for nonexistent token"
+        );
+
+        // Retrieve the card name for the tokenId
+        string memory cardName = _cardNames[_cardTypes[tokenId]];
+
+        // Convert the card name to lowercase to match your file naming convention
+        string memory imageName = toLower(cardName);
+
+        // Construct the image URL using the base URI and the lowercase card name
+        string memory imageURI = string(
+            abi.encodePacked(baseURI, imageName, "_magma.png")
+        );
+
+        string memory name = string(
+            abi.encodePacked(cardName, " #", tokenId.toString())
+        );
+        string memory description = "Meet the FUDkers, a whole bunch of FUDkers who live in the \"Neighborhood On The Blockchain\"! These are the Magma:Onyx TESTNET \"FUDkers\" Card Editions.\n\nSometimes you see more clearly with your two eyes shut. Most want to see \"TO THE MOON\" &, \"WAGMI\", but when you keep it REAL, that's when you become a FUDker.. And FUDkers are ALWAYS welcome in the Neighborhood O.T.B.";
+        string memory score = cardScores[tokenId].toString();
+
+        // Construct the JSON metadata
+        string memory json = Base64.encode(
+            bytes(
+                string(
+                    abi.encodePacked(
+                        '{"name":"',
+                        name,
+                        '", ',
+                        '"description":"',
+                        description,
+                        '", ',
+                        '"attributes":[{"trait_type":"Score", "value": ',
+                        score,
+                        "}], ",
+                        '"image":"',
+                        imageURI,
+                        '"}'
+                    )
+                )
+            )
+        );
+
+        return string(abi.encodePacked("data:application/json;base64,", json));
     }
 
-    // Internal function for simplified "random" card type selection
-    function _randomCardType() internal view returns (uint256) {
-        uint256 random = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % 17;
-        while (cardSupplies[random] >= 100) {
-            random = (random + 1) % 17;
+    // Helper function to convert a string to lowercase
+    function toLower(string memory str) internal pure returns (string memory) {
+        bytes memory bStr = bytes(str);
+        bytes memory bLower = new bytes(bStr.length);
+        for (uint256 i = 0; i < bStr.length; i++) {
+            // If uppercase character, convert to lowercase
+            if ((uint8(bStr[i]) >= 65) && (uint8(bStr[i]) <= 90)) {
+                bLower[i] = bytes1(uint8(bStr[i]) + 32);
+            } else {
+                bLower[i] = bStr[i];
+            }
         }
-        return random;
-    }
-
-    // Utility to convert uint256 to string
-    function _toString(uint256 value) internal pure returns (string memory) {
-        bytes memory buffer = new bytes(78);
-        uint256 length = 0;
-        do {
-            buffer[length++] = bytes1(uint8(48 + value % 10));
-            value /= 10;
-        } while (value != 0);
-        bytes memory str = new bytes(length);
-        for (uint256 i = 0; i < length; i++) {
-            str[i] = buffer[length - 1 - i];
-        }
-        return string(str);
+        return string(bLower);
     }
 }
