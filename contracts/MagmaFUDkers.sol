@@ -143,7 +143,7 @@ contract FUDkersTN is ERC721Enumerable, Ownable, Pausable {
         string memory name = string(
             abi.encodePacked(cardName, " #", tokenId.toString())
         );
-        string memory description = "Meet the FUDkers, a whole bunch of FUDkers who live in the \"Neighborhood On The Blockchain\"! These are the Magma:Onyx TESTNET \"FUDkers\" Card Editions.\n\nSometimes you see more clearly with your two eyes shut. Most want to see \"TO THE MOON\" &, \"WAGMI\", but when you keep it REAL, that's when you become a FUDker.. And FUDkers are ALWAYS welcome in the Neighborhood O.T.B.";
+        string memory description = "Meet the FUDkers, a whole bunch of FUDkers who live in the 'Neighborhood On The Blockchain'! These are the Magma:Onyx TESTNET 'FUDkers' Card Editions.\n\nSometimes you see more clearly with your two eyes shut. Most want to see 'TO THE MOON' &, 'WAGMI', but when you keep it REAL, that's when you become a FUDker.. And FUDkers are ALWAYS welcome in the Neighborhood O.T.B.";
         string memory score = cardScores[tokenId].toString();
 
         // Construct the JSON metadata
