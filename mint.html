@@ -650,7 +650,7 @@
 		"stateMutability": "view",
 		"type": "function"
 	}
-]; 
+];
                 contract = new web3.eth.Contract(abi, contractAddress);
             } else {
                 alert("Please install MetaMask to use this app.");
@@ -701,6 +701,9 @@
                 alert("Error connecting to MetaMask: " + error.message);
             }
         });
+
+        document.getElementById('mintSingleButton').addEventListener('click', mintSingle);
+        document.getElementById('mintFiveButton').addEventListener('click', mintFive);
 
         window.onload = init;
     </script>
