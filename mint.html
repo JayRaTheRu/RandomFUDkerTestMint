@@ -51,7 +51,7 @@
             <button id="connectButton">Connect Wallet</button>
             <p id="userAddress"></p>
         </div>
-        <div id="mintingOptions">
+        <div id="mintingOptions" style="display: none;">
             <h2>Minting Options</h2>
             <p>Price: 0.05 🌋</p>
             <button id="mintSingleButton" disabled>Mint Single FUDker</button>
@@ -66,12 +66,10 @@
 
         async function init() {
             if (window.ethereum) {
-                try {
-                    await ethereum.request({ method: 'eth_requestAccounts' });
-                    web3 = new Web3(window.ethereum);
-                    const networkId = await web3.eth.net.getId();
-                    const contractAddress = '0xdBd1B73877b2BdFA415f8e21d81A786926c58cFB'; // Replace with the actual contract address
-                    const abi = [
+                web3 = new Web3(window.ethereum);
+                const networkId = await web3.eth.net.getId();
+                const contractAddress = '0xdBd1B73877b2BdFA415f8e21d81A786926c58cFB';
+                const abi = [
 	{
 		"inputs": [
 			{
@@ -653,12 +651,7 @@
 		"type": "function"
 	}
 ]; 
-
-                    contract = new web3.eth.Contract(abi, contractAddress);
-                    updateWalletInfo();
-                } catch (error) {
-                    alert("Error connecting to MetaMask: " + error.message);
-                }
+                contract = new web3.eth.Contract(abi, contractAddress);
             } else {
                 alert("Please install MetaMask to use this app.");
             }
@@ -673,6 +666,7 @@
                     document.getElementById('connectButton').style.display = "none";
                     document.getElementById('mintSingleButton').disabled = false;
                     document.getElementById('mintFiveButton').disabled = false;
+                    document.getElementById('mintingOptions').style.display = "block";
                 }
             } catch (error) {
                 console.error("Error updating wallet info:", error);
@@ -698,6 +692,15 @@
                 console.error("Error minting 5-Pack FUDkers:", error);
             }
         }
+
+        document.getElementById('connectButton').addEventListener('click', async () => {
+            try {
+                await ethereum.request({ method: 'eth_requestAccounts' });
+                updateWalletInfo();
+            } catch (error) {
+                alert("Error connecting to MetaMask: " + error.message);
+            }
+        });
 
         window.onload = init;
     </script>
