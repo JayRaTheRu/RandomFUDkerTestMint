@@ -652,10 +652,11 @@
 	}
 ];
                 contract = new web3.eth.Contract(abi, contractAddress);
-            } else {
-                alert("Please install MetaMask to use this app.");
-            }
-        }
+                    updateWalletInfo();
+    } else {
+        alert("Please install MetaMask to use this app.");
+    }
+}
 
         async function updateWalletInfo() {
             try {
