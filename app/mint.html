@@ -43,13 +43,13 @@
             cursor: not-allowed;
         }
         .minting-page {
-            background-image: url('https://pbs.twimg.com/media/GJXhZxJawAALggL?format=jpg&name=large');
+            background-image: url('https://pbs.twimg.com/media/GJXhZxJawAALggL.jpg');
             background-size: cover;
             background-position: center;
         }
     </style>
 </head>
-<body class="minting-page"> <!-- Apply the minting-page class here -->
+<body class="minting-page">
     <div class="container">
         <h1>FUDkersTN Minting App</h1>
         <div class="wallet-info" id="walletInfo">
@@ -76,7 +76,9 @@
                     web3 = new Web3(window.ethereum);
                     const networkId = await web3.eth.net.getId();
                     const contractAddress = '0xdBd1B73877b2BdFA415f8e21d81A786926c58cFB'; // Replace with the actual contract address
-                    const abi = [ /* Your ABI here */ ]; 
+                    const abi = [
+                        // Contract ABI here
+                    ]; 
 
                     contract = new web3.eth.Contract(abi, contractAddress);
                     updateWalletInfo();
