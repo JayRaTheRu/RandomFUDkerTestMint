@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFT Stats Page</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('grunge.jpg');
+            background-size: cover;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+
+        .top-section {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .stats-panel {
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #000;
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            /* Use flexbox */
+            justify-content: space-around;
+            /* Distribute space around items */
+            flex-wrap: wrap;
+            /* Allow items to wrap */
+        }
+
+        .stats-item {
+            margin: 10px;
+            /* Add some margin around each stat */
+            padding: 5px;
+            /* Add some padding for better readability */
+            background: rgba(0, 0, 0, 0.2);
+            /* Slight background for each stat */
+            border-radius: 5px;
+            /* Rounded corners for each stat */
+        }
+
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+            padding: 20px;
+        }
+
+        .nft-card {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .nft-card img {
+            max-width: 60%;
+            border-radius: 5px;
+        }
+
+        .nft-info {
+            margin-top: 10px;
+        }
+
+        a {
+            color: #ccc;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #fff;
+        }
+
+        .bar-container {
+            width: 100%;
+            background-color: #f1f1f1;
+            text-align: center;
+            color: white;
+        }
+
+        .bar {
+            width: 0%;
+            height: 10px;
+            background-color: #4CAF50;
+        }
+
+        /* Additional styling for labels, etc. */
+        .bar-label {
+            padding: 5px;
+            color: black;
+            background: rgba(255, 255, 255, 0.6);
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top-section">
+        <img src="logo.png" alt="Logo" style="width: 30%; height: auto;">
+    </div>
+
+    <div class="stats-panel" id="statsPanel">
+        <!-- Stats will be displayed here -->
+    </div>
+    <div class="grid" id="nftGrid">
+        <!-- NFTs will be displayed here -->
+    </div>
+
+    <div id="distributionContainer"></div>
+
+
+    <script>
+
+        async function fetchNFTs() {
+            try {
+                let allNFTs = [];
+                let uniqueToken = null;
+                const pageSize = 50;
+
+                while (true) {
+                    let url = `https://magmascan.org/api/v2/tokens/0x2ce62026CEBE07e100bC5F6eD8C7eaeec9208a54/instances?limit=${pageSize}`;
+                    if (uniqueToken) {
+                        url += `&unique_token=${uniqueToken}`;
+                    }
+
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(`API call failed with status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (!data.items || data.items.length === 0) {
+                        break;
+                    }
+
+                    allNFTs = allNFTs.concat(data.items);
+
+                    if (!data.next_page_params || data.next_page_params === null) {
+                        break;
+                    }
+
+                    uniqueToken = data.next_page_params.unique_token;
+                }
+
+                displayNFTs(allNFTs);
+                displayScoreDistribution(allNFTs);
+                updateStats(allNFTs, uniqueHolders.size);
+            } catch (error) {
+                console.error("Error fetching NFTs:", error);
+            }
+        }
+
+        function updateStats(nfts, uniqueHoldersCount) {
+            const statsPanel = document.getElementById('statsPanel');
+            statsPanel.innerHTML = ''; // Clear any existing content
+
+            const nftCounts = nfts.reduce((acc, nft) => {
+                const nameKey = nft.metadata.name.replace(/#\d+/g, '').trim();
+                acc[nameKey] = (acc[nameKey] || 0) + 1;
+                return acc;
+            }, {});
+
+            const totalNFTsFetched = nfts.length;
+
+            // Create a div to hold the compact stats
+            const compactStats = document.createElement('div');
+            compactStats.style.display = 'flex';
+            compactStats.style.flexWrap = 'wrap';
+            compactStats.style.justifyContent = 'space-around';
+            compactStats.style.alignItems = 'center';
+            compactStats.style.padding = '10px';
+
+            // Total NFTs
+            const totalNFTsElement = document.createElement('div');
+            totalNFTsElement.innerHTML = `<strong>Cards Minted:</strong> ${totalNFTsFetched}`;
+            compactStats.appendChild(totalNFTsElement);
+
+
+            // Total Unique Holders
+            const totalHoldersElement = document.createElement('div');
+            totalHoldersElement.innerHTML = `&nbsp;&nbsp;&nbsp;<strong>Holders:</strong> ${uniqueHoldersCount}`;
+            compactStats.appendChild(totalHoldersElement);
+
+            // Append compact stats to the panel
+            statsPanel.appendChild(compactStats);
+
+            // Card Type Counts
+            const cardTypeCounts = document.createElement('div');
+            cardTypeCounts.style.display = 'grid';
+            cardTypeCounts.style.gridTemplateColumns = 'auto auto';
+            cardTypeCounts.style.gap = '10px';
+            cardTypeCounts.style.marginTop = '10px';
+
+            Object.entries(nftCounts).forEach(([name, count]) => {
+                const nftCountElement = document.createElement('div');
+                nftCountElement.innerHTML = `<strong>${name[0].toUpperCase() + name.slice(1)}:</strong> ${count}`;
+                cardTypeCounts.appendChild(nftCountElement);
+            });
+
+            // Append card type counts to the panel
+            statsPanel.appendChild(cardTypeCounts);
+        }
+
+
+
+        let uniqueHolders = new Set(); // This will store unique holder addresses
+
+
+
+
+        function displayNFTs(nfts, filterAddress = '') {
+            // Filter NFTs if a filterAddress is provided
+            const filteredNFTs = filterAddress ? nfts.filter(nft => nft.owner.hash === filterAddress) : nfts;
+
+            // Sort NFTs by score in descending order
+            filteredNFTs.sort((a, b) => {
+                const aScore = a.metadata.attributes.find(attr => attr.trait_type === "Score")?.value || 0;
+                const bScore = b.metadata.attributes.find(attr => attr.trait_type === "Score")?.value || 0;
+                return bScore - aScore; // For descending order
+            });
+
+            const nftGrid = document.getElementById('nftGrid');
+            nftGrid.innerHTML = ''; // Clear any existing content
+            uniqueHolders.clear(); // Reset unique holders for each call to displayNFTs
+
+            filteredNFTs.forEach(nft => {
+                const holderAddress = nft.owner.hash; // Access the owner's hash property
+                uniqueHolders.add(holderAddress); // Add to the set of unique holders
+
+                const nftCard = document.createElement('div');
+                nftCard.classList.add('nft-card');
+
+                const nftImage = document.createElement('img');
+                nftImage.src = nft.image_url;
+                nftImage.alt = nft.metadata.name;
+                nftCard.appendChild(nftImage);
+
+                const nftInfo = document.createElement('div');
+                nftInfo.classList.add('nft-info');
+
+                const nftName = document.createElement('p');
+                nftName.textContent = nft.metadata.name.replace(/#\d+/g, '').trim(); // Ensure the name does not include the # sign and id number
+                nftInfo.appendChild(nftName);
+
+                const scoreAttribute = nft.metadata.attributes.find(attr => attr.trait_type === "Score");
+                if (scoreAttribute) {
+                    const nftScore = document.createElement('p');
+                    nftScore.textContent = `Score: ${scoreAttribute.value}`;
+                    nftInfo.appendChild(nftScore);
+                }
+
+                const formattedHolder = `${holderAddress.slice(0, 6)}...${holderAddress.slice(-4)}`; // Shorten the holder address for display
+                const nftHolder = document.createElement('p');
+                nftHolder.textContent = `Holder: ${formattedHolder}`;
+                nftInfo.appendChild(nftHolder);
+
+                nftCard.appendChild(nftInfo);
+                nftGrid.appendChild(nftCard);
+            });
+
+            // If no NFTs match the filter, display a message
+            if (filteredNFTs.length === 0) {
+                const noResultsMsg = document.createElement('p');
+                noResultsMsg.textContent = 'No NFTs found for this address.';
+                noResultsMsg.style.color = '#FF4136'; // Red color for the message
+                nftGrid.appendChild(noResultsMsg);
+            }
+        }
+
+
+
+
+        function updateUniqueHoldersCount(count) {
+            // Implementation to update the UI with the unique holders count
+            const uniqueHoldersElement = document.getElementById('uniqueHoldersCount');
+            if (uniqueHoldersElement) {
+                uniqueHoldersElement.textContent = `Total Unique Holders: ${count}`;
+            } else {
+                // Create the element if it doesn't exist
+                const statsPanel = document.getElementById('statsPanel');
+                const newUniqueHoldersElement = document.createElement('p');
+                newUniqueHoldersElement.id = 'uniqueHoldersCount';
+                newUniqueHoldersElement.textContent = `Total Unique Holders: ${count}`;
+                statsPanel.appendChild(newUniqueHoldersElement);
+            }
+        }
+
+
+
+
+        // Ensure this function gets called where appropriate
+        fetchNFTs();
+
+        function displayScoreDistribution(nfts) {
+            const distributionContainer = document.getElementById('distributionContainer');
+            distributionContainer.innerHTML = ''; // Clear existing content
+
+            const scoreByType = nfts.reduce((acc, nft) => {
+                const type = nft.metadata.name.replace(/#\d+/g, '').trim(); // Extract type without numbers
+                const scoreAttribute = nft.metadata.attributes.find(attr => attr.trait_type === "Score");
+                const score = scoreAttribute ? scoreAttribute.value : 0;
+
+                if (!acc[type]) {
+                    acc[type] = { totalScore: 0, count: 0 };
+                }
+                acc[type].totalScore += score;
+                acc[type].count++;
+
+                return acc;
+            }, {});
+
+            Object.entries(scoreByType).forEach(([type, { totalScore, count }]) => {
+                const avgScore = totalScore / count;
+                const bar = document.createElement('div');
+                bar.classList.add('bar');
+                bar.style.width = `${avgScore}%`;
+
+                const label = document.createElement('div');
+                label.classList.add('bar-label');
+                label.textContent = `${type}: ${avgScore.toFixed(2)}`;
+
+                const container = document.createElement('div');
+                container.classList.add('bar-container');
+                container.appendChild(bar);
+                container.appendChild(label);
+
+                distributionContainer.appendChild(container);
+            });
+        }
+
+    </script>
+</body>
+
+</html>
