@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FUDkers Tesnet</title>
+    <title>NFT Minting Page</title>
     <style>
         body,
         html {
@@ -12,6 +12,9 @@
             padding: 0;
             width: 100%;
             height: 100%;
+            font-family: 'Roboto', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .top-section {
@@ -28,63 +31,45 @@
             background-image: url('https://raw.githubusercontent.com/JayRaTheRu/RandomFUDkerTestMint/main/grunge.jpg');
             background-size: cover;
             height: auto;
-            /* Adjust the height as needed */
             padding: 10px 0;
-            /* Top and bottom padding */
             overflow-x: auto;
-            /* Enables horizontal scrolling */
             white-space: nowrap;
-            /* Prevents wrapping of child elements */
         }
 
         .nft-container {
             display: flex;
-            /* Aligns children (NFT cards) in a row */
             overflow-x: auto;
-            /* Enables horizontal scrolling */
             white-space: nowrap;
-            /* Prevents wrapping to a new line */
             padding: 10px;
-            /* Padding around the container */
         }
 
         .nft-card {
             flex: 0 0 auto;
-            /* Prevents cards from growing or shrinking */
             margin: 10px;
-            /* Space between cards */
             padding: 10px;
-            /* Padding inside the card */
             border: 1px solid #ccc;
-            /* Card border */
             background: #000;
-            /* Card background color */
             color: #fff;
-            /* Card text color, including name and score */
             text-align: center;
-            /* Centers the text and image */
             display: inline-block;
-            /* Ensures cards are displayed in a row */
             overflow: hidden;
-            /* Hides parts of the image that exceed the card size */
             white-space: normal;
-            /* Allows text to wrap */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .nft-card:hover {
+            transform: translateY(-5px);
         }
 
         .nft-card img {
             max-width: 100px;
-            /* Maximum width of the image */
             max-height: 100px;
-            /* Maximum height of the image */
             width: auto;
-            /* Scales the width automatically to maintain aspect ratio */
             height: auto;
-            /* Scales the height automatically to maintain aspect ratio */
             border-radius: 5px;
-            /* Optional: Rounds the corners of the image */
         }
-
-
 
         .nft {
             margin: 10px;
@@ -117,6 +102,13 @@
             cursor: pointer;
             background-color: #fff;
             color: #000;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .wallet-connect:hover,
+        .minting-options button:hover {
+            background-color: #000;
+            color: #fff;
         }
 
         .address-indicator span {
@@ -129,12 +121,14 @@
             margin-top: 10px;
         }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
 </head>
 
 <body>
     <div class="top-section">
         <div class="logo">
-            <center><img src="https://raw.githubusercontent.com/JayRaTheRu/RandomFUDkerTestMint/main/logo.png"></center><br><br><br>
+            <center><img src="logo.png"></center><br><br><br>
         </div>
         <div class="mint-panel">
             <button id="connectButton" class="wallet-connect">Connect Wallet</button>
@@ -766,23 +760,54 @@
 
 
         async function fetchNFTs() {
-            console.log('Fetching NFTs...'); // Before fetching
-            const response = await fetch('https://magmascan.org/api/v2/tokens/0x2ce62026CEBE07e100bC5F6eD8C7eaeec9208a54/instances');
-            const data = await response.json();
-            console.log('Raw fetched data:', data); // After fetching
+            let allNFTs = []; // Store all fetched NFTs
+            let userAccountLower = userAccount.toLowerCase(); // Convert user account to lowercase for comparison
+            let uniqueToken = null; // Initially, there's no unique token
+            const pageSize = 10; // You can adjust this as needed
 
-            const filteredNFTs = data.items.filter(item => item.owner.hash.toLowerCase() === userAccount.toLowerCase());
-            console.log('Filtered NFTs:', filteredNFTs); // After filtering
+            while (true) {
+                let apiUrl = `https://magmascan.org/api/v2/tokens/0x2ce62026CEBE07e100bC5F6eD8C7eaeec9208a54/instances?limit=${pageSize}&owner=${userAccountLower}`;
+                if (uniqueToken) {
+                    apiUrl += `&unique_token=${uniqueToken}`; // Append the unique token if it exists
+                }
 
-            displayNFTs(filteredNFTs);
+                try {
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) {
+                        throw new Error(`API call failed with status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    if (!data.items || data.items.length === 0) {
+                        break; // Exit the loop if no items are fetched
+                    }
+
+                    allNFTs = allNFTs.concat(data.items); // Add fetched items to the allNFTs array
+
+                    if (!data.next_page_params || data.next_page_params.unique_token === null) {
+                        break; // Exit the loop if there are no more pages
+                    }
+
+                    uniqueToken = data.next_page_params.unique_token; // Update the unique token for the next iteration
+                } catch (error) {
+                    console.error("Error fetching NFTs:", error);
+                    break; // Exit the loop in case of an error
+                }
+            }
+
+            displayNFTs(allNFTs); // Call displayNFTs with all fetched NFTs
         }
+
 
 
         function displayNFTs(nfts) {
             const container = document.querySelector('.bottom-section');
             container.innerHTML = ''; // Clear existing content
 
-            nfts.forEach(nft => {
+            // Filter NFTs owned by the connected user
+            const ownedNFTs = nfts.filter(nft => nft.owner.hash.toLowerCase() === userAccount.toLowerCase());
+
+            ownedNFTs.forEach(nft => {
                 console.log('Displaying NFT:', nft); // Each NFT being processed
 
                 const div = document.createElement('div');
@@ -799,7 +824,7 @@
                 div.appendChild(a); // Append the anchor element to the div
 
                 const name = document.createElement('p');
-                name.textContent = `Name: ${nft.metadata.name}`;
+                name.textContent = `${nft.metadata.name}`;
                 div.appendChild(name);
 
                 const score = document.createElement('p');
