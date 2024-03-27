@@ -84,10 +84,20 @@
             color: #000;
         }
 
+        /* Existing CSS for logo */
         .logo img {
-            width: 50%;
+            width: 65%;
             height: auto;
         }
+
+        /* Media query for devices with a width of 768px or less */
+        @media (max-width: 768px) {
+            .logo img {
+                width: 100%;
+                /* Make the logo image take up 100% of the logo container's width */
+            }
+        }
+
 
         .mint-panel {
             background: #000;
