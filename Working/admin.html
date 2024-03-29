@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FUDkers Minting Page</title>
+    <style>
+      body {
+        font-family: Montserrat, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-image: url("Images/14 FUDker image compilation v2.png");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      .container {
+        text-align: center;
+        position: relative;
+      }
+
+      .title-container {
+        background-color: rgba(0, 0, 0, 0.85);
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        position: relative;
+        overflow: hidden;
+        border: 3px solid #d94c2a; /* Add border with desired color */
+        top: -28px; /* Adjust the top position as needed */
+      }
+
+      h1 {
+        color: #fff;
+        margin-bottom: 5px;
+      }
+
+      .minting-options {
+        color: #fff;
+        font-size: 18px;
+        margin-top: 5px;
+      }
+
+      .mint-buttons {
+        display: flex;
+        justify-content: center;
+        background-color: #000;
+        /* Set background color of surrounding box to black */
+        padding: 10px;
+        /* Add padding for spacing */
+        border: 2px solid #fff;
+        /* Add white outline */
+        border-radius: 10px;
+        /* Add border radius for rounded corners */
+      }
+
+      .mint-button {
+        padding: 6px 12px;
+        /* Adjust padding to make buttons smaller */
+        background-color: #000;
+        /* Change button color to black */
+        color: #fff;
+        /* Change text color to white */
+        border: 2px solid #fff;
+        /* Add white border */
+        cursor: pointer;
+        font-size: 18px;
+        /* Reduce font size */
+        margin: 0 5px;
+      }
+
+      .mint-button:hover {
+        background-color: #0056b3;
+      }
+
+      .mint-button:active {
+        transform: translateY(1px);
+      }
+
+      .logo-link {
+        position: absolute;
+        top: -118px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .logo-link img {
+        width: 250px;
+        height: auto;
+        border: 3px solid #fff; /* Add white border */
+      }
+
+      /* MetaMask sign-in button */
+      #metamaskSignIn {
+        position: fixed;
+        top: 2px;
+        right: 3px;
+        background-color: #ffcc32;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        border: 3px solid #000000; /* Add border with desired color */
+      }
+
+      /* Audio player */
+      #audioPlayer {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        z-index: 9999;
+        width: 300px; /* Adjust the width as needed */
+        height: 50px; /* Adjust the height as needed */
+        background-color: #000000; /* Fill the shape with black color */
+        border-radius: 5px; /* Add rounded corners */
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Audio player -->
+    <audio id="audioPlayer" controls autoplay>
+      <source src="Music/What If_.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+
+    <div class="container">
+      <a
+        href="https://jayratheru.github.io/RandomFUDkerTestMint/stats.html"
+        class="logo-link"
+        target="_blank"
+      >
+        <img src="Images/NHOTBLogo.png" alt="NHOTB Logo" />
+      </a>
+      <div class="title-container">
+        <h1>TESTNET FUDkers</h1>
+        <div class="minting-options">
+          Price: 0.05 🌋<br />
+          Minting Options
+        </div>
+        <br />
+        <div class="mint-buttons">
+          <button type="submit" class="mint-button">Mint A FUDker</button>
+          <button type="submit" class="mint-button">Mint 5 FUDkers</button>
+        </div>
+        <!-- MetaMask wallet sign-in button -->
+        <button id="metamaskSignIn">Connect to MetaMask</button>
+      </div>
+      <form id="mintForm"></form>
+    </div>
+    <script>
+      document
+        .getElementById("metamaskSignIn")
+        .addEventListener("click", async function () {
+          try {
+            // Requesting MetaMask to connect
+            await window.ethereum.request({ method: "eth_requestAccounts" });
+            console.log("MetaMask connected successfully!");
+          } catch (error) {
+            console.error("Error connecting to MetaMask:", error);
+          }
+        });
+
+      document
+        .getElementById("mintForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          const formData = new FormData(event.target);
+          const data = Object.fromEntries(formData.entries());
+          console.log("Form data:", data);
+        });
+    </script>
+  </body>
+</html>
