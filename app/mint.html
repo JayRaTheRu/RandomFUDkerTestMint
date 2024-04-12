@@ -680,24 +680,35 @@
         }
 
         async function mintSingle() {
-            try {
-                const accounts = await web3.eth.getAccounts();
-                await contract.methods.mint(1).send({ from: accounts[0], value: web3.utils.toWei('0.05', 'ether') });
-                alert("Single FUDker minted successfully.");
-            } catch (error) {
-                console.error("Error minting single FUDker:", error);
-            }
+    try {
+        const networkId = await web3.eth.net.getId();
+        if (networkId !== 6969696969) {
+            throw new Error("Please switch to the proper network to mint.");
         }
+        
+        const accounts = await web3.eth.getAccounts();
+        await contract.methods.mint(1).send({ from: accounts[0], value: web3.utils.toWei('0.05', 'ether') });
+        alert("Single FUDker minted successfully.");
+    } catch (error) {
+        console.error("Error minting single FUDker:", error);
+    }
+}
 
-        async function mintFive() {
-            try {
-                const accounts = await web3.eth.getAccounts();
-                await contract.methods.mint(5).send({ from: accounts[0], value: web3.utils.toWei('0.25', 'ether') });
-                alert("5-Pack FUDkers minted successfully.");
-            } catch (error) {
-                console.error("Error minting 5-Pack FUDkers:", error);
-            }
+async function mintFive() {
+    try {
+        const networkId = await web3.eth.net.getId();
+        if (networkId !== 6969696969) {
+            throw new Error("Please switch to the proper network to mint.");
         }
+        
+        const accounts = await web3.eth.getAccounts();
+        await contract.methods.mint(5).send({ from: accounts[0], value: web3.utils.toWei('0.25', 'ether') });
+        alert("5-Pack FUDkers minted successfully.");
+    } catch (error) {
+        console.error("Error minting 5-Pack FUDkers:", error);
+    }
+}
+
 
         window.onload = init;
     </script>
